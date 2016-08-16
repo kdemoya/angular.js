@@ -42,6 +42,20 @@ function parseAppUrl(relativeUrl, locationObj) {
   locationObj.$$search = parseKeyValue(match.search);
   locationObj.$$hash = decodeURIComponent(match.hash);
 
+  /**
+   * PATCH FOR JUNIPER SSL:
+   * Detect Juniper re-write functions and handle the $$path issue.
+   *
+   * REFERENCE:
+   * https://github.com/angular/angular.js/issues/8905
+   */
+  if (locationObj.$$path === "[object Object]" && typeof(DanaOrigUrl) === 'function') {
+    var __strH = 'href';
+    var __tmpHack = match[__strH];
+    var __nn = ("" + __tmpHack).match(/^(https?:\/\/[^\/]+)?([^?|#]*)/);
+    locationObj.$$path = __nn[2];
+  }
+
   // make sure path starts with '/';
   if (locationObj.$$path && locationObj.$$path.charAt(0) !== '/') {
     locationObj.$$path = '/' + locationObj.$$path;

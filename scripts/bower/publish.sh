@@ -26,8 +26,8 @@ function prepare {
   #
   for repo in "${REPOS[@]}"
   do
-    echo "-- Cloning bower-$repo"
-    git clone git@github.com:angular/bower-$repo.git $TMP_DIR/bower-$repo
+    echo "-- Cloning $repo-juniper"
+    git clone git@github.com:kdemoya/$repo-juniper.git $TMP_DIR/$repo-juniper
   done
 
 
@@ -39,16 +39,19 @@ function prepare {
   do
     if [ -f $BUILD_DIR/$repo.js ] # ignore i18l
       then
-        echo "-- Updating files in bower-$repo"
-        cp $BUILD_DIR/$repo.* $TMP_DIR/bower-$repo/
+        echo "-- Updating files in $repo-juniper"
+        cp $BUILD_DIR/$repo.* $TMP_DIR/$repo-juniper/
     fi
   done
 
-  # move i18n files
-  cp $BUILD_DIR/i18n/*.js $TMP_DIR/bower-angular-i18n/
-
   # move csp.css
-  cp $BUILD_DIR/angular-csp.css $TMP_DIR/bower-angular
+  echo "-- Moving csp.css"
+  cp $BUILD_DIR/angular-csp.css $TMP_DIR/angular-juniper/
+
+  # move i18n files
+  echo "-- Moving i18n files"
+  cp -R $BUILD_DIR/i18n/*.js $TMP_DIR/$repo-juniper-i18n/
+
 
 
   #
@@ -56,11 +59,11 @@ function prepare {
   #
   for repo in "${REPOS[@]}"
   do
-    if [ -f $TMP_DIR/bower-$repo/precommit.sh ]
+    if [ -f $TMP_DIR/$repo-juniper/precommit.sh ]
       then
-        echo "-- Running precommit.sh script for bower-$repo"
-        cd $TMP_DIR/bower-$repo
-        $TMP_DIR/bower-$repo/precommit.sh
+        echo "-- Running precommit.sh script for $repo-juniper"
+        cd $TMP_DIR/$repo-juniper
+        $TMP_DIR/$repo-juniper/precommit.sh
         cd $SCRIPT_DIR
     fi
   done
@@ -72,8 +75,8 @@ function prepare {
   #
   for repo in "${REPOS[@]}"
   do
-    echo "-- Updating version in bower-$repo to $NEW_VERSION"
-    cd $TMP_DIR/bower-$repo
+    echo "-- Updating version in $repo-juniper to $NEW_VERSION"
+    cd $TMP_DIR/$repo-juniper
     replaceJsonProp "bower.json" "version" ".*" "$NEW_VERSION"
     replaceJsonProp "bower.json" "angular.*" ".*" "$NEW_VERSION"
     replaceJsonProp "package.json" "version" ".*" "$NEW_VERSION"
@@ -81,7 +84,7 @@ function prepare {
 
     git add -A
 
-    echo "-- Committing and tagging bower-$repo"
+    echo "-- Committing and tagging $repo-juniper"
     git commit -m "v$NEW_VERSION"
     git tag v$NEW_VERSION
     cd $SCRIPT_DIR
@@ -91,8 +94,8 @@ function prepare {
 function publish {
   for repo in "${REPOS[@]}"
   do
-    echo "-- Pushing bower-$repo"
-    cd $TMP_DIR/bower-$repo
+    echo "-- Pushing $repo-juniper"
+    cd $TMP_DIR/$repo-juniper
     git push origin master
     git push origin v$NEW_VERSION
 
